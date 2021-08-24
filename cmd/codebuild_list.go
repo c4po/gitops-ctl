@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	// "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	// "encoding/json"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	// "github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/hashicorp/vault/api"
 	"github.com/spf13/cobra"
-	"encoding/json"
 	"log"
 	"os"
 )
@@ -18,7 +20,7 @@ var codebuildListCmd = &cobra.Command{
 	Short: "List codebuild projects",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var token = os.Getenv("VAULT_TOKEN")
+		var vault_token = os.Getenv("VAULT_TOKEN")
 		var vault_addr = os.Getenv("VAULT_ADDR")
 
 		vaultConfig := &api.Config{
@@ -29,25 +31,31 @@ var codebuildListCmd = &cobra.Command{
 			fmt.Println(err)
 			return
 		}
-		vaultClient.SetToken(token)
+		vaultClient.SetToken(vault_token)
 
 		data, err := vaultClient.Logical().Read("aws_v2/creds/account_id_819784554124")
 		if err != nil {
 			panic(err)
 		}
 
-		b, _ := json.Marshal(data.Data)
-		fmt.Println(string(b))
-
 		log.Println(fmt.Sprintf("List AWS codebuild projects: %d", 10))
 
-		cfg, err := config.LoadDefaultConfig(context.TODO())
-		if err != nil {
-			log.Fatal(err)
+		// cfg, err := config.LoadDefaultConfig(context.TODO())
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		options := s3.Options{
+			Region:      "us-east-1",
+			Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
+				data.Data["access_key"].(string),
+				data.Data["secret_key"].(string),
+				data.Data["security_token"].(string))),
 		}
 
 		// Create an Amazon S3 service client
-		client := s3.NewFromConfig(cfg)
+		// client := s3.NewFromConfig(cfg)
+		client := s3.New(options)
 
 		input := &s3.ListBucketsInput{}
 
