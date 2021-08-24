@@ -14,7 +14,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(fmt.Sprintf("gitops-ctl. (branch=%s, revision=%s)", Branch, Revision))
+		fmt.Println(fmt.Sprintf("gitops-ctl (branch=%s, revision=%s)", Branch, Revision))
 	},
 }
 

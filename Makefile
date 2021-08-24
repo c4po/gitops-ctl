@@ -23,6 +23,8 @@ test:
 
 # .PHONY: publish
 # publish:
+# 	gsutil cp bin/darwin-terraformctl gs://etsy-terraformctl-prod/${BRANCH_NAME}/darwin-terraformctl
+# 	gsutil cp bin/linux-terraformctl gs://etsy-terraformctl-prod/${BRANCH_NAME}/linux-terraformctl
 
 .PHONY: fmt
 fmt:
