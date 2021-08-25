@@ -6,13 +6,14 @@ import (
 	// "github.com/aws/aws-sdk-go-v2/aws"
 	// "encoding/json"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/spf13/viper"
 	// "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/hashicorp/vault/api"
 	"github.com/spf13/cobra"
 	"log"
-	"os"
+	// "os"
 )
 
 var codebuildListCmd = &cobra.Command{
@@ -20,9 +21,9 @@ var codebuildListCmd = &cobra.Command{
 	Short: "List codebuild projects",
 	Run: func(cmd *cobra.Command, args []string) {
 
-		var vault_token = os.Getenv("VAULT_TOKEN")
-		var vault_addr = os.Getenv("VAULT_ADDR")
-
+		var github_token = viper.GetString("github_token")
+		var vault_addr = viper.GetString("vault_addr")
+		fmt.Println(vault_addr, github_token)
 		vaultConfig := &api.Config{
 			Address: vault_addr,
 		}
@@ -31,6 +32,19 @@ var codebuildListCmd = &cobra.Command{
 			fmt.Println(err)
 			return
 		}
+
+		secret, err := vaultClient.Logical().Write(
+			"auth/github/login",
+			map[string]interface{}{
+				"token": github_token,
+			})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		vault_token := secret.Auth.ClientToken
+
 		vaultClient.SetToken(vault_token)
 
 		data, err := vaultClient.Logical().Read("aws_v2/creds/account_id_819784554124")
@@ -46,7 +60,7 @@ var codebuildListCmd = &cobra.Command{
 		// }
 
 		options := s3.Options{
-			Region:      "us-east-1",
+			Region: "us-east-1",
 			Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
 				data.Data["access_key"].(string),
 				data.Data["secret_key"].(string),
