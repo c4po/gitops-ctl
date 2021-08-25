@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/aws/aws-sdk-go-v2 v1.8.1
 	github.com/aws/aws-sdk-go-v2/credentials v1.3.3
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.13.0
+	github.com/aws/aws-sdk-go-v2/service/codebuild v1.8.0
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/manifoldco/promptui v0.8.0
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect

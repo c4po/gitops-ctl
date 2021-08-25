@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 	// "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/codebuild"
 	"github.com/hashicorp/vault/api"
 	"github.com/spf13/cobra"
 	"log"
@@ -59,7 +59,7 @@ var codebuildListCmd = &cobra.Command{
 		// 	log.Fatal(err)
 		// }
 
-		options := s3.Options{
+		options := codebuild.Options{
 			Region: "us-east-1",
 			Credentials: aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
 				data.Data["access_key"].(string),
@@ -67,23 +67,20 @@ var codebuildListCmd = &cobra.Command{
 				data.Data["security_token"].(string))),
 		}
 
-		// Create an Amazon S3 service client
-		// client := s3.NewFromConfig(cfg)
-		client := s3.New(options)
+		client := codebuild.New(options)
+		input := &codebuild.ListProjectsInput{}
 
-		input := &s3.ListBucketsInput{}
-
-		result, err := client.ListBuckets(context.TODO(), input)
+		result, err := client.ListProjects(context.TODO(), input)
 		if err != nil {
-			fmt.Println("Got an error retrieving buckets:")
+			fmt.Println("Got an error listing Projects:")
 			fmt.Println(err)
 			return
 		}
 
-		fmt.Println("Buckets:")
+		fmt.Println("Codebuild Projects:")
 
-		for _, bucket := range result.Buckets {
-			fmt.Println(*bucket.Name + ": " + bucket.CreationDate.Format("2006-01-02 15:04:05 Monday"))
+		for _, project := range result.Projects {
+			fmt.Println(project)
 		}
 
 	},
